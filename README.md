@@ -37,3 +37,10 @@ Each model is deployed with **GPU acceleration**, custom preprocessing (denoisin
 ```bash
 git clone https://github.com/hxrsha05/Realtime-Defect-Detection.git
 cd Realtime-Defect-Detection
+
+
+Author
+Developed by J Sri Harshavardhan Palaniswamy 
+📧 [sriharshajay@gmail.com.com]
+🔗 LinkedIn - www.linkedin.com/in/sri-harshavardhan-palaniswamy-j-618212372
+🐙 GitHub - https://github.com/hxrsha05
