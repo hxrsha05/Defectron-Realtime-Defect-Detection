@@ -1,0 +1,40 @@
+import cv2
+from ultralytics import YOLO
+
+# Load the trained model and move to GPU
+model = YOLO("best.pt")
+model.to("cuda")  # Force model to use GPU
+
+# Open USB camera (use the correct index)
+cap = cv2.VideoCapture(1)
+
+# Set camera resolution to 1080p
+cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
+cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
+
+cv2.namedWindow("Weld Defect Detection", cv2.WINDOW_NORMAL)
+
+while cap.isOpened():
+    ret, frame = cap.read()
+    if not ret:
+        print("Failed to grab frame.")
+        break
+
+    # Resize frame (optional, match training size if needed)
+    frame_resized = cv2.resize(frame, (832, 832))
+
+    # Use .predict() and force device to GPU
+    results = model.predict(source=frame_resized, conf=0.25, device=0)  # device=0 = GPU
+
+    # Plot the results
+    annotated_frame = results[0].plot()
+
+    # Display the annotated frame
+    cv2.imshow("Weld Defect Detection", annotated_frame)
+
+    # Quit on 'q' key
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
+
+cap.release()
+cv2.destroyAllWindows()

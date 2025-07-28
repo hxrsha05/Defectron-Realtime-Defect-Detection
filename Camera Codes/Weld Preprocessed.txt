@@ -1,0 +1,58 @@
+import cv2
+from ultralytics import YOLO
+
+# Load YOLOv9-C model and push to GPU
+model = YOLO("best.pt")
+model.to("cuda")
+
+# Open USB camera
+cap = cv2.VideoCapture(1)
+cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
+cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
+
+cv2.namedWindow("Weld Defect Detection", cv2.WINDOW_NORMAL)
+
+def preprocess_image(frame):
+    # Convert to LAB color space
+    lab = cv2.cvtColor(frame, cv2.COLOR_BGR2LAB)
+    
+    # Split channels
+    l, a, b = cv2.split(lab)
+    
+    # Apply CLAHE to L-channel
+    clahe = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(8, 8))
+    l_eq = clahe.apply(l)
+    
+    # Merge back
+    lab_eq = cv2.merge((l_eq, a, b))
+    frame_clahe = cv2.cvtColor(lab_eq, cv2.COLOR_LAB2BGR)
+
+    # Optional: slight sharpening
+    kernel = np.array([[0, -1, 0],
+                       [-1, 5, -1],
+                       [0, -1, 0]])
+    sharpened = cv2.filter2D(frame_clahe, -1, kernel)
+
+    return sharpened
+
+while cap.isOpened():
+    ret, frame = cap.read()
+    if not ret:
+        print("❌ Failed to grab frame.")
+        break
+
+    # -------- Preprocess input frame --------
+    processed_frame = preprocess_image(frame)
+
+    # -------- Run inference on GPU --------
+    results = model.predict(source=processed_frame, conf=0.3, device=0)
+
+    # -------- Display output --------
+    output = results[0].plot()
+    cv2.imshow("Weld Defect Detection", output)
+
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
+
+cap.release()
+cv2.destroyAllWindows()

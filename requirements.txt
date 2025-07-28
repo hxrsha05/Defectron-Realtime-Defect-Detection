@@ -1,0 +1,12 @@
+Flask
+opencv-python
+ultralytics
+numpy
+torch
+matplotlib
+pillow
+scikit-learn
+langchain
+sentence-transformers
+faiss-cpu
+huggingface_hub

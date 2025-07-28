@@ -1,0 +1,81 @@
+import cv2
+import numpy as np
+from ultralytics import YOLO
+
+# Load model to GPU
+model = YOLO("best.pt")
+model.to("cuda")
+
+# Camera setup
+cap = cv2.VideoCapture()
+cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
+cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
+
+cv2.namedWindow("Weld Defect Detection", cv2.WINDOW_NORMAL)
+
+# Zoom settings
+zoom_factor = 1.0
+zoom_step = 0.1
+min_zoom = 1.0
+max_zoom = 2.0
+
+def preprocess_image(frame):
+    # Step 1: Denoising (removes salt-and-pepper noise)
+    denoised = cv2.medianBlur(frame, 3)
+
+    # Step 2: Convert to LAB and apply CLAHE
+    lab = cv2.cvtColor(denoised, cv2.COLOR_BGR2LAB)
+    l, a, b = cv2.split(lab)
+    clahe = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(8, 8))
+    l_eq = clahe.apply(l)
+    lab_eq = cv2.merge((l_eq, a, b))
+    frame_clahe = cv2.cvtColor(lab_eq, cv2.COLOR_LAB2BGR)
+
+    # Step 3: Sharpening (brings back edges after denoise)
+    kernel = np.array([[0, -1, 0],
+                       [-1, 5, -1],
+                       [0, -1, 0]])
+    sharpened = cv2.filter2D(frame_clahe, -1, kernel)
+
+    return sharpened
+
+def apply_zoom(frame, zoom_factor):
+    if zoom_factor <= 1.0:
+        return frame
+    h, w = frame.shape[:2]
+    center_x, center_y = w // 2, h // 2
+    new_w, new_h = int(w / zoom_factor), int(h / zoom_factor)
+    x1 = max(center_x - new_w // 2, 0)
+    y1 = max(center_y - new_h // 2, 0)
+    x2 = min(x1 + new_w, w)
+    y2 = min(y1 + new_h, h)
+    cropped = frame[y1:y2, x1:x2]
+    return cv2.resize(cropped, (w, h))
+
+# Real-time loop
+while cap.isOpened():
+    ret, frame = cap.read()
+    if not ret:
+        print("❌ Failed to grab frame.")
+        break
+
+    frame_zoomed = apply_zoom(frame, zoom_factor)
+    processed = preprocess_image(frame_zoomed)
+
+    # YOLO inference (GPU)
+    results = model.predict(source=processed, conf=0.3, device=0)
+    output = results[0].plot()
+
+    # Display result
+    cv2.imshow("Weld Defect Detection", output)
+
+    key = cv2.waitKey(1) & 0xFF
+    if key == ord('q'):
+        break
+    elif key in [ord('+'), ord('=')]:
+        zoom_factor = min(max_zoom, zoom_factor + zoom_step)
+    elif key in [ord('-'), ord('_')]:
+        zoom_factor = max(min_zoom, zoom_factor - zoom_step)
+
+cap.release()
+cv2.destroyAllWindows()
