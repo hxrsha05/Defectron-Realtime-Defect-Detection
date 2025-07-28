@@ -35,4 +35,4 @@ Each model is deployed with **GPU acceleration**, custom preprocessing (denoisin
 ### 1. Clone the Repository
 
 ```bash
-
+git clone https://github.com/yourusername/industrial-defect-detection.git
