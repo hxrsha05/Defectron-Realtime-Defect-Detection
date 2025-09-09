@@ -26,7 +26,7 @@ Each model is deployed with **GPU acceleration**, custom preprocessing (denoisin
 - **Ultralytics YOLOv8 / YOLOv9 / YOLOv10**
 - **Torch + CUDA (GPU Inference)**
 - **Real-time Camera Feed**
-- **Image Preprocessing (CLAHE, Median Blur, Sharpening)**
+- **Image Preprocessing**
 
 ---
 
