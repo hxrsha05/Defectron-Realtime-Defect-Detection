@@ -42,5 +42,5 @@ cd Realtime-Defect-Detection
 ## Author
 Developed by Sri Harshavardhan Palaniswamy J  
 📧 sriharshajay@gmail.com  
-🔗 LinkedIn - www.linkedin.com/in/sri-harshavardhan-palaniswamy-j-618212372  
+🔗 LinkedIn - https://www.linkedin.com/in/sriharsha05  
 🐙 GitHub - https://github.com/hxrsha05  
