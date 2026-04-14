@@ -1,88 +1,73 @@
-# 🔍 Realtime Defect Detection
+# Realtime Defect Detection
 
-A real-time industrial defect detection system built with Flask and YOLOv9, supporting live camera inference across multiple defect domains — with preprocessing, logging, and visual analytics.
-
----
-
-## ✨ Features
-
-- **Live Camera Inference** — Real-time detection streamed directly from a webcam feed
-- **Multi-Model Support** — Switch between specialized models for:
-  - Surface defects (NEU-DET dataset)
-  - Weld defects
-  - Paint defects
-- **Zoom Mode** — Crops and passes a zoomed region to the model for closer inspection
-- **CLAHE + Sharpening Preprocessing** — Applied selectively to the weld model pipeline for improved contrast on metallic surfaces
-- **Segmentation Visualization** — Overlays segmentation masks on detected regions
-- **CSV Logging** — Automatically logs all detections with timestamps and labels
-- **Label-wise Statistics** — Live bar and pie charts showing detection distribution per class
-- **Custom HTML UI** — Clean, purpose-built frontend templates
+A Flask-based defect detection system that runs inference on a live camera feed using YOLOv9. Built to support industrial inspection use cases — surface, weld, and paint defects — with preprocessing, logging, and a stats dashboard.
 
 ---
 
-## 🧠 Model Details
+## What it does
 
-| Model | Dataset | Architecture | Classes |
-|-------|---------|--------------|---------|
-| Surface | NEU-DET | YOLOv9c | crazing, inclusion, patches, pitted\_surface, rolled-in\_scale, scratches |
-| Weld | Custom | YOLOv9c | — |
-| Paint | Custom | YOLOv9c | — |
-
-Surface model trained at: `100 epochs · image size 640 · batch 16 · GPU`
-
----
-
-## 🗂️ Project Structure
-
-```
-Realtime-Defect-Detection/
-├── app.py                  # Flask app entry point
-├── models/                 # YOLOv9 model weights
-├── templates/              # HTML UI templates
-├── static/                 # CSS, JS, assets
-├── utils/
-│   ├── preprocessing.py    # CLAHE + sharpening pipeline
-│   ├── logger.py           # CSV detection logger
-│   └── stats.py            # Chart generation utilities
-└── runs/                   # Inference outputs
-```
+- Streams live camera feed and runs per-frame inference using YOLOv9
+- Supports three separate models: surface, weld, paint
+- Zoom mode crops the frame before passing it to the model — useful for catching fine-grained defects at a distance
+- CLAHE + sharpening preprocessing applied selectively to the weld pipeline (metallic surfaces respond well; the other models don't need it)
+- Logs every detection to a CSV with timestamps and class labels
+- Displays running bar and pie charts broken down by defect class
+- Segmentation masks overlaid on the live feed
 
 ---
 
-## 🚀 Getting Started
+## Models
 
-### Prerequisites
+| Target | Architecture | Training Data |
+|--------|-------------|---------------|
+| Surface | YOLOv9c | NEU-DET (6 classes) |
+| Weld | YOLOv9c | Custom dataset |
+| Paint | YOLOv9c | Custom dataset |
+
+NEU-DET classes: `crazing`, `inclusion`, `patches`, `pitted_surface`, `rolled-in_scale`, `scratches`
+
+Surface model trained at 100 epochs, image size 640, batch 16 on GPU.
+
+---
+
+## Setup
 
 ```bash
 pip install flask ultralytics opencv-python pandas matplotlib
-```
-
-### Run
-
-```bash
 python app.py
 ```
 
-Open `http://localhost:5000` in your browser.
+Go to `http://localhost:5000`.
+
+Model weights are not included due to file size. Train using the configs provided or reach out directly.
 
 ---
 
-## 📊 Analytics
+## Project structure
 
-Detections are logged in real time to a `.csv` file. The dashboard displays:
-- **Bar chart** — count per defect class
-- **Pie chart** — distribution of defect types across the session
+```
+Realtime-Defect-Detection/
+├── app.py
+├── models/
+├── templates/
+├── static/
+└── utils/
+    ├── preprocessing.py
+    ├── logger.py
+    └── stats.py
+```
 
 ---
 
-## 📌 Notes
+## Notes
 
-- CLAHE preprocessing is scoped only to the **weld model** to avoid degrading performance on other model types
-- Zoom mode passes the cropped frame (not the full feed) to the model for inference
-- Model weights are not included in this repo due to size — train using the provided configs or contact for access
+- Zoom mode sends the cropped region, not the full frame, to the model
+- Preprocessing is scoped to the weld model only — applying it elsewhere degrades accuracy
+- Detection stats reset per session; CSV persists across runs
 
 ---
 
-## 🧑‍💻 Author
+## Author
 
-**Sri Harshavardhan Palaniswamy J** 
+Sri Harshavardhan — AI/CS Engineering, PSG iTech  
+[github.com/hxrsha05](https://github.com/hxrsha05)
