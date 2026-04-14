@@ -113,5 +113,5 @@ Model weights are not included due to file size. Train using the provided config
 
 ## Author
 
-**Sri Harshavardhan** — AI/CS Engineering, PSG iTech  
-[github.com/hxrsha05](https://github.com/hxrsha05)
+**Sri Harshavardhan Palaniswamy J**
+
